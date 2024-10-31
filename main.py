@@ -1,10 +1,6 @@
-from dotenv import load_dotenv
 import os
 import tkinter as tk
 from tkinter import filedialog
-
-load_dotenv()
-starting_directory = os.getenv("STARTING_DIRECTORY")
 
 def get_directory_tree(starting_directory, prefix=""):
     # List to hold each line of the directory tree
@@ -38,27 +34,27 @@ def get_directory_tree(starting_directory, prefix=""):
     return tree_lines   
 
 
-def openFile():
-    filedialog.askdirectory()
+def openPath():
+    filepath = filedialog.askdirectory()
+    if filepath:
+        tree_text.delete("1.0", tk.END)
+        directory_tree = get_directory_tree(filepath)
+        tree_text.insert(tk.END, "\n".join(directory_tree))
 
 
 root = tk.Tk()
 root.title("Directory Tree")
 
-button = tk.Button(text="Open", command=openFile)
+button = tk.Button(text="Open", command=openPath)
 button.pack()
 
-""" scrollbar = tk.Scrollbar(root)
+scrollbar = tk.Scrollbar(root)
 scrollbar.pack( side = tk.RIGHT, fill=tk.Y )
 
 tree_text = tk.Text(root, width=100, height=40, font=("Courier", 12), bg="gray1", fg="white")
 tree_text.pack(fill=tk.BOTH, expand=True) 
 
-
 scrollbar.config(command=tree_text.yview)
 tree_text.config(yscrollcommand=scrollbar.set)
-
-directory_tree = get_directory_tree(starting_directory)
-tree_text.insert(tk.END, "\n".join(directory_tree)) """
 
 root.mainloop()
