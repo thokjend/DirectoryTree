@@ -5,6 +5,8 @@ from tkinter import filedialog
 def get_directory_tree(starting_directory, prefix=""):
     # List to hold each line of the directory tree
     tree_lines = []
+    file_count = 0
+    directory_count = 0
     
     # List the contents of the current directory
     items = os.listdir(starting_directory)
@@ -24,29 +26,38 @@ def get_directory_tree(starting_directory, prefix=""):
         
         # If it's a directory, recursively get its contents
         if os.path.isdir(current_path):
+            directory_count += 1
             if index == total_items - 1:
                 new_prefix = prefix + "    "
             else:
                 new_prefix = prefix + "│   "
             # Extend tree_lines with the result from the recursive call
-            tree_lines.extend(get_directory_tree(current_path, new_prefix))
+            sub_tree, sub_file_count, sub_directory_count = get_directory_tree(current_path, new_prefix)
+            tree_lines.extend(sub_tree)
+            file_count += sub_file_count
+            directory_count += sub_directory_count
+        else:
+            file_count += 1    
     
-    return tree_lines   
+    return tree_lines, file_count, directory_count
 
 
 def openPath():
     filepath = filedialog.askdirectory()
+    print(filepath)
     if filepath:
         tree_text.delete("1.0", tk.END)
-        directory_tree = get_directory_tree(filepath)
+        directory_tree, file_count, directory_count = get_directory_tree(filepath)
         tree_text.insert(tk.END, "\n".join(directory_tree))
+        tree_text.insert(tk.END, f"\n\nTotal files: {file_count}")
+        tree_text.insert(tk.END, f"\nTotal directories: {directory_count}")
 
 
 root = tk.Tk()
 root.title("Directory Tree")
 
 button = tk.Button(text="Open", command=openPath)
-button.pack()
+button.pack(side = tk.TOP, fill=tk.X)
 
 scrollbar = tk.Scrollbar(root)
 scrollbar.pack( side = tk.RIGHT, fill=tk.Y )
