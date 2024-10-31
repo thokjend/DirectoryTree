@@ -13,8 +13,6 @@ def get_directory_tree(starting_directory, prefix=""):
     items = os.listdir(starting_directory)
     items = sorted(items, key=lambda x: (not os.path.isdir(os.path.join(starting_directory, x)), x))
     total_items = len(items)
-
-    
     
     for index, item in enumerate(items):
         current_path = os.path.join(starting_directory, item)
@@ -47,6 +45,12 @@ def get_directory_tree(starting_directory, prefix=""):
     
     return tree_lines, file_count, directory_count, file_size
 
+def format_size(size_in_bytes):
+    for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+        if size_in_bytes < 1024:
+            return f"{size_in_bytes:.2f} {unit}"
+        size_in_bytes /= 1024
+    return f"{size_in_bytes:.2f} TB"
 
 def openPath():
     filepath = filedialog.askdirectory()
@@ -56,7 +60,7 @@ def openPath():
         tree_text.insert(tk.END, "\n".join(directory_tree))
         tree_text.insert(tk.END, f"\n\nTotal files: {file_count}")
         tree_text.insert(tk.END, f"\nTotal directories: {directory_count}")
-        tree_text.insert(tk.END, f"\nTotal size: {file_size / (1024 * 1024):.2f} MB")
+        tree_text.insert(tk.END, f"\nTotal size: {format_size(file_size)}")
 
 root = tk.Tk()
 root.title("Directory Tree")
