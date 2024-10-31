@@ -44,7 +44,6 @@ def get_directory_tree(starting_directory, prefix=""):
 
 def openPath():
     filepath = filedialog.askdirectory()
-    print(filepath)
     if filepath:
         tree_text.delete("1.0", tk.END)
         directory_tree, file_count, directory_count = get_directory_tree(filepath)
