@@ -1,5 +1,6 @@
 import os
 import tkinter as tk
+import datetime
 from tkinter import filedialog
 
 def get_directory_tree(starting_directory, prefix=""):
@@ -16,6 +17,9 @@ def get_directory_tree(starting_directory, prefix=""):
     
     for index, item in enumerate(items):
         current_path = os.path.join(starting_directory, item)
+        time = os.stat(current_path).st_ctime
+        formatted_time = datetime.datetime.fromtimestamp(time).strftime('%Y-%m-%d %H:%M:%S')
+        #dt = str(datetime.datetime.fromtimestamp(time))
         
         if index == total_items - 1:
             connector = "└── "
@@ -23,7 +27,7 @@ def get_directory_tree(starting_directory, prefix=""):
             connector = "├── "
         
         # Add the current item to the tree list
-        tree_lines.append(prefix + connector + item)
+        tree_lines.append(f"{prefix}{connector}{item}   [Created: {formatted_time}]")
         
         # If it's a directory, recursively get its contents
         if os.path.isdir(current_path):
@@ -41,7 +45,7 @@ def get_directory_tree(starting_directory, prefix=""):
             
         else:
             file_count += 1
-            file_size += os.stat(current_path).st_size  
+            file_size += os.stat(current_path).st_size
     
     return tree_lines, file_count, directory_count, file_size
 
