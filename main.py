@@ -19,7 +19,6 @@ def get_directory_tree(starting_directory, prefix=""):
         current_path = os.path.join(starting_directory, item)
         time = os.stat(current_path).st_ctime
         formatted_time = datetime.datetime.fromtimestamp(time).strftime('%d-%m-%Y %H:%M:%S')
-        #dt = str(datetime.datetime.fromtimestamp(time))
         
         if index == total_items - 1:
             connector = "└── "
@@ -57,14 +56,28 @@ def format_size(size_in_bytes):
     return f"{size_in_bytes:.2f} TB"
 
 def openPath():
+    global directory_tree, file_count, directory_count, file_size  # Make accessible to other functions
     filepath = filedialog.askdirectory()
     if filepath:
-        tree_text.delete("1.0", tk.END)
         directory_tree, file_count, directory_count, file_size = get_directory_tree(filepath)
-        tree_text.insert(tk.END, "\n".join(directory_tree))
+        display_tree(directory_tree, show_totals=True)
+
+def display_tree(lines, show_totals=False):
+    tree_text.delete("1.0", tk.END)  # Clear the text area
+    tree_text.insert(tk.END, "\n".join(lines))
+    if show_totals:
         tree_text.insert(tk.END, f"\n\nTotal files: {file_count}")
         tree_text.insert(tk.END, f"\nTotal directories: {directory_count}")
         tree_text.insert(tk.END, f"\nTotal size: {format_size(file_size)}")
+
+def check(e):
+    typed = input_box.get().lower()
+    if typed == "":
+        display_tree(directory_tree, show_totals=True)  # Show full tree with totals if search box is empty
+    else:
+        filtered_lines = [line for line in directory_tree if typed in line.lower()]
+        display_tree(filtered_lines)
+
 
 root = tk.Tk()
 root.title("Directory Tree")
@@ -83,12 +96,14 @@ label.pack(pady=(5, 5))
 
 input_box = tk.Entry(frame, font=("Helvetica", 16), bd=2, relief=tk.SUNKEN, width=40)
 input_box.pack(pady=(5, 20))
+input_box.bind("<KeyRelease>", check)
+
 
 # Text area for the directory tree output with a scrollbar
 scrollbar = tk.Scrollbar(frame)
 scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-tree_text = tk.Text(frame, width=100, height=40, font=("Courier", 12), bg="gray10", fg="white", yscrollcommand=scrollbar.set)
+tree_text = tk.Text(frame, width=125, height=40, font=("Courier", 12), bg="gray10", fg="white", yscrollcommand=scrollbar.set)
 tree_text.pack(fill=tk.BOTH, expand=True)
 scrollbar.config(command=tree_text.yview)
 
