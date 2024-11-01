@@ -18,7 +18,7 @@ def get_directory_tree(starting_directory, prefix=""):
     for index, item in enumerate(items):
         current_path = os.path.join(starting_directory, item)
         time = os.stat(current_path).st_ctime
-        formatted_time = datetime.datetime.fromtimestamp(time).strftime('%Y-%m-%d %H:%M:%S')
+        formatted_time = datetime.datetime.fromtimestamp(time).strftime('%d-%m-%Y %H:%M:%S')
         #dt = str(datetime.datetime.fromtimestamp(time))
         
         if index == total_items - 1:
@@ -69,16 +69,27 @@ def openPath():
 root = tk.Tk()
 root.title("Directory Tree")
 
-button = tk.Button(text="Open", command=openPath)
-button.pack(side = tk.TOP, fill=tk.X)
+# Adding padding around each widget
+frame = tk.Frame(root, pady=10, padx=10, bg="gray15")
+frame.pack(fill=tk.BOTH, expand=True)
 
-scrollbar = tk.Scrollbar(root)
-scrollbar.pack( side = tk.RIGHT, fill=tk.Y )
+# Styling and positioning the button
+button = tk.Button(frame, text="Open Directory", font=("Helvetica", 12), command=openPath, bg="lightgray", fg="black")
+button.pack(side=tk.TOP, fill=tk.X, pady=(10, 20))
 
-tree_text = tk.Text(root, width=100, height=40, font=("Courier", 12), bg="gray1", fg="white")
-tree_text.pack(fill=tk.BOTH, expand=True) 
+# Styling the label and input box with spacing
+label = tk.Label(frame, text="Search Directory", font=("Helvetica", 14, "bold"), bg="gray15", fg="white")
+label.pack(pady=(5, 5))
 
+input_box = tk.Entry(frame, font=("Helvetica", 16), bd=2, relief=tk.SUNKEN, width=40)
+input_box.pack(pady=(5, 20))
+
+# Text area for the directory tree output with a scrollbar
+scrollbar = tk.Scrollbar(frame)
+scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+tree_text = tk.Text(frame, width=100, height=40, font=("Courier", 12), bg="gray10", fg="white", yscrollcommand=scrollbar.set)
+tree_text.pack(fill=tk.BOTH, expand=True)
 scrollbar.config(command=tree_text.yview)
-tree_text.config(yscrollcommand=scrollbar.set)
 
 root.mainloop()
