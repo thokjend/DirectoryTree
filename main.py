@@ -1,6 +1,5 @@
 import os
 import tkinter as tk
-import datetime
 from tkinter import filedialog
 
 history = []
@@ -20,8 +19,6 @@ def get_directory_tree(starting_directory, prefix=""):
     
     for index, item in enumerate(items):
         current_path = os.path.join(starting_directory, item)
-        time = os.stat(current_path).st_birthtime
-        formatted_time = datetime.datetime.fromtimestamp(time).strftime('%d-%m-%Y %H:%M:%S')
         
         if index == total_items - 1:
             connector = "└── "
@@ -31,7 +28,7 @@ def get_directory_tree(starting_directory, prefix=""):
         # Add the current item to the tree list
         if os.path.isdir(current_path):
             directory_count += 1
-            tree_lines.append((f"{prefix}{connector}{item}   [Created: {formatted_time}]", current_path))
+            tree_lines.append((f"{prefix}{connector}{item}", current_path))
             # Extend tree_lines with the result from the recursive call
             new_prefix = prefix + ("    " if index == total_items - 1 else "│   ")
             sub_tree, sub_file_count, sub_directory_count, sub_file_size = get_directory_tree(current_path, new_prefix)
@@ -42,7 +39,7 @@ def get_directory_tree(starting_directory, prefix=""):
         else:
             file_count += 1
             file_size += os.stat(current_path).st_size
-            tree_lines.append((f"{prefix}{connector}{item}   [Created: {formatted_time}]", None))
+            tree_lines.append((f"{prefix}{connector}{item}", None))
     
     return tree_lines, file_count, directory_count, file_size
 
@@ -79,20 +76,13 @@ def load_directory_tree(path):
 def display_tree(lines, show_totals=False):
     tree_text.delete("1.0", tk.END)  # Clear the text area
     for idx, (line, path) in enumerate(lines):
-        # Split the line into parts: prefix, connector, directory name, and time
-        parts = line.split("   [Created: ")  # Split on the time part
-        main_text = parts[0]
-        time_text = f"   [Created: {parts[1]}" if len(parts) > 1 else ""
-        
-        # Extract the directory name only
-        prefix, directory_name = main_text.rsplit(" ", 1)  # Split on the last space
-        full_line = f"{prefix} {directory_name}{time_text}\n"
-        
-        # Insert the line
+        main_text = line
+        prefix, directory_name = main_text.rsplit(" ", 1)
+        full_line = f"{prefix} {directory_name}\n"
+
         line_index = f"{idx + 1}.0"
         tree_text.insert(line_index, full_line)
-        
-        # Highlight only the directory name part
+
         directory_name_start = f"{idx + 1}.{len(prefix) + 1}"
         directory_name_end = f"{idx + 1}.{len(prefix) + 1 + len(directory_name)}"
         
