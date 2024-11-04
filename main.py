@@ -3,6 +3,9 @@ import tkinter as tk
 import datetime
 from tkinter import filedialog
 
+history = []
+history_index = -1
+
 def get_directory_tree(starting_directory, prefix=""):
     # List to hold each line of the directory tree
     tree_lines = []
@@ -17,7 +20,7 @@ def get_directory_tree(starting_directory, prefix=""):
     
     for index, item in enumerate(items):
         current_path = os.path.join(starting_directory, item)
-        time = os.stat(current_path).st_ctime
+        time = os.stat(current_path).st_birthtime
         formatted_time = datetime.datetime.fromtimestamp(time).strftime('%d-%m-%Y %H:%M:%S')
         
         if index == total_items - 1:
@@ -51,14 +54,27 @@ def format_size(size_in_bytes):
     return f"{size_in_bytes:.2f} TB"
 
 def openPath():
+    global filepath, history, history_index
     filepath = filedialog.askdirectory()
     if filepath:
+        history = [filepath]
+        history_index = 0
+        update_navigation_buttons()
+        path_label.config(text=f"Current Path: {filepath}")
+        input_box.config(state="normal")
         load_directory_tree(filepath)
+    else:
+        input_box.config(state="disabled")
 
 def load_directory_tree(path):
-    global directory_tree, file_count, directory_count, file_size
+    global directory_tree, file_count, directory_count, file_size, history_index
     directory_tree, file_count, directory_count, file_size = get_directory_tree(path)
+    path_label.config(text=f"Current Path: {path}")
     display_tree(directory_tree, show_totals=True)
+    if history and history[history_index] != path:
+        history.append(path)
+        history_index += 1
+        update_navigation_buttons()
 
 def display_tree(lines, show_totals=False):
     tree_text.delete("1.0", tk.END)  # Clear the text area
@@ -98,6 +114,26 @@ def check(e):
         filtered_lines = [(line, path) for line, path in directory_tree if typed in line.lower()]
         display_tree(filtered_lines)
 
+
+def go_back():
+    global history_index
+    if history_index > 0:
+        history_index -= 1
+        load_directory_tree(history[history_index])
+        update_navigation_buttons()
+
+def go_forward():
+    global history_index
+    if history_index < len(history) - 1:
+        history_index += 1
+        load_directory_tree(history[history_index])
+        update_navigation_buttons()
+
+def update_navigation_buttons():
+    back_button.config(state="normal" if history_index > 0 else "disabled")
+    forward_button.config(state="normal" if history_index < len(history) - 1 else "disabled")
+
+
 root = tk.Tk()
 root.title("Directory Tree")
 
@@ -113,9 +149,21 @@ button.pack(side=tk.TOP, fill=tk.X, pady=(10, 20))
 label = tk.Label(frame, text="Search Directory", font=("Helvetica", 14, "bold"), bg="gray15", fg="white")
 label.pack(pady=(5, 5))
 
-input_box = tk.Entry(frame, font=("Helvetica", 16), bd=2, relief=tk.SUNKEN, width=40)
+input_box = tk.Entry(frame, font=("Helvetica", 16), bd=2, relief=tk.SUNKEN, width=40, state="disabled")
 input_box.pack(pady=(5, 20))
 input_box.bind("<KeyRelease>", check)
+
+nav_frame = tk.Frame(frame, bg="gray15")
+nav_frame.pack(pady=(5, 5))
+
+back_button = tk.Button(nav_frame, text="←", state="disabled", command=go_back)
+back_button.pack(side=tk.LEFT, padx=5)
+
+forward_button = tk.Button(nav_frame, text="→", state="disabled", command=go_forward)
+forward_button.pack()
+
+path_label = tk.Label(frame, text="Current Path: ", font=("Helvetica", 14, "bold"), bg="gray15", fg="white")
+path_label.pack(pady=(5, 10))
 
 # Text area for the directory tree output with a scrollbar
 scrollbar = tk.Scrollbar(frame)
