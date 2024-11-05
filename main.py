@@ -67,6 +67,7 @@ def load_directory_tree(path):
     global directory_tree, file_count, directory_count, file_size, history_index
     directory_tree, file_count, directory_count, file_size = get_directory_tree(path)
     path_label.config(text=f"Current Path: {path}")
+    #input_box.delete(0, tk.END)
     display_tree(directory_tree, show_totals=True)
     if history and history[history_index] != path:
         history.append(path)
@@ -74,6 +75,8 @@ def load_directory_tree(path):
         update_navigation_buttons()
 
 def display_tree(lines, show_totals=False):
+    tree_text.config(state="normal")    
+
     tree_text.delete("1.0", tk.END)  # Clear the text area
     for idx, (line, path) in enumerate(lines):
         main_text = line
@@ -95,6 +98,8 @@ def display_tree(lines, show_totals=False):
         tree_text.insert(tk.END, f"\n\nTotal files: {file_count}")
         tree_text.insert(tk.END, f"\nTotal directories: {directory_count}")
         tree_text.insert(tk.END, f"\nTotal size: {format_size(file_size)}")
+    
+    tree_text.config(state="disabled")
 
 def check(e):
     typed = input_box.get().lower()
@@ -110,6 +115,7 @@ def go_back():
     if history_index > 0:
         history_index -= 1
         load_directory_tree(history[history_index])
+        #input_box.delete(0, tk.END)
         update_navigation_buttons()
 
 def go_forward():
@@ -117,6 +123,7 @@ def go_forward():
     if history_index < len(history) - 1:
         history_index += 1
         load_directory_tree(history[history_index])
+        #input_box.delete(0, tk.END)
         update_navigation_buttons()
 
 def update_navigation_buttons():
